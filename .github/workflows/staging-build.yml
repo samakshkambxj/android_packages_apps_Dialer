@@ -1,0 +1,40 @@
+name: Dialer Staging
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Make Gradle executable
+        run: chmod +x gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Stage APK
+        run: |
+          mkdir -p ./artifacts
+          cp $(find . -type f -path "*build/outputs/apk/debug/*.apk" | head -1) ./artifacts/MaxxOS-Dialer.apk
+          ls -la ./artifacts
+
+      - name: Publish APK to rolling staging release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view staging >/dev/null 2>&1 || gh release create staging --title "Staging build" --notes "Latest staging APK (direct .apk download, no zip)." --prerelease
+          gh release upload staging ./artifacts/MaxxOS-Dialer.apk --clobber

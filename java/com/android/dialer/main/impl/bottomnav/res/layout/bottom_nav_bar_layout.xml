@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2018 The Android Open Source Project
+  ~ Copyright (C) 2023 The LineageOS Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,39 +15,50 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
+<!-- Root is a FrameLayout (BottomNavBar): the legacy tab strip plus, on
+  - builds with Compose + miuix-blur (staging Gradle APK), the floating
+  - liquid-glass pill installed programmatically by BottomNavBar over the
+  - activity content. AOSP/Soong ROM builds without those libs keep the
+  - legacy strip and are unaffected. -->
 <com.android.dialer.main.impl.bottomnav.BottomNavBar
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/rounded_dialpad_bg_color"
-    android:elevation="8dp">
+    android:layout_height="wrap_content">
 
-  <include
-      android:id="@+id/speed_dial_tab"
-      android:layout_width="0dp"
+  <LinearLayout
+      android:id="@+id/legacy_bottom_nav"
+      android:orientation="horizontal"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_weight="1"
-      layout="@layout/bottom_nav_item"/>
+      android:background="@color/rounded_dialpad_bg_color"
+      android:elevation="8dp">
 
-  <include
-      android:id="@+id/call_log_tab"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_weight="1"
-      layout="@layout/bottom_nav_item"/>
+    <include
+        android:id="@+id/speed_dial_tab"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        layout="@layout/bottom_nav_item"/>
 
-  <include
-      android:id="@+id/contacts_tab"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_weight="1"
-      layout="@layout/bottom_nav_item"/>
+    <include
+        android:id="@+id/call_log_tab"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        layout="@layout/bottom_nav_item"/>
 
-  <include
-      android:id="@+id/voicemail_tab"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_weight="1"
-      layout="@layout/bottom_nav_item"/>
+    <include
+        android:id="@+id/contacts_tab"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        layout="@layout/bottom_nav_item"/>
+
+    <include
+        android:id="@+id/voicemail_tab"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        layout="@layout/bottom_nav_item"/>
+  </LinearLayout>
 </com.android.dialer.main.impl.bottomnav.BottomNavBar>

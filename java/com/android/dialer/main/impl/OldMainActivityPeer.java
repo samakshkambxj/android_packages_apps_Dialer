@@ -250,6 +250,7 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
 
     searchController = getNewMainSearchController(bottomNav, fab, toolbar, snackbarContainer);
     toolbar.setSearchBarListener(searchController);
+    bottomNavTabListener.setSearchController(searchController);
 
     onDialpadQueryChangedListener = getNewOnDialpadQueryChangedListener(searchController);
     dialpadListener =
@@ -380,6 +381,7 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
       LogUtil.i("OldMainActivityPeer.onHandleIntent", "Dial or add call intent");
       // Dialpad will grab the intent and populate the number
       searchController.showDialpadFromNewIntent();
+      bottomNav.selectTab(TabIndex.DIALPAD);
     }
 
     if (intent.getBooleanExtra(MainComponent.EXTRA_CLEAR_NEW_VOICEMAILS, false)) {
@@ -471,6 +473,11 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
   public boolean onBackPressed() {
     LogUtil.enterBlock("OldMainActivityPeer.onBackPressed");
     if (searchController.onBackPressed()) {
+      // Backing out of the dialpad tab returns to the previously selected tab.
+      if (bottomNav.getSelectedTab() == TabIndex.DIALPAD
+          && !searchController.isDialpadVisible()) {
+        bottomNav.selectTab(bottomNavTabListener.getPreviousTab());
+      }
       return true;
     }
     return false;
@@ -843,6 +850,11 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
     }
 
     @Override
+    public void onDialpadSelected() {
+      setCurrentTab(TabIndex.DIALPAD);
+    }
+
+    @Override
     public void onVoicemailSelected() {
       setCurrentTab(TabIndex.VOICEMAIL);
     }
@@ -950,6 +962,8 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
     private final View bottomSheet;
 
     @TabIndex private int selectedTab = TabIndex.NONE;
+    @TabIndex private int previousTab = TabIndex.SPEED_DIAL;
+    private MainSearchController searchController;
 
     private MainBottomNavBarBottomNavTabListener(
         TransactionSafeActivity activity,
@@ -962,6 +976,21 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
       this.bottomSheet = bottomSheet;
     }
 
+    void setSearchController(MainSearchController searchController) {
+      this.searchController = searchController;
+    }
+
+    /** Last selected non-dialpad tab, restored when backing out of the dialpad tab. */
+    @TabIndex int getPreviousTab() {
+      return previousTab;
+    }
+
+    private void hideDialpadIfNeeded() {
+      if (searchController != null) {
+        searchController.hideDialpad();
+      }
+    }
+
     @Override
     public void onSpeedDialSelected() {
       LogUtil.enterBlock("MainBottomNavBarBottomNavTabListener.onSpeedDialSelected");
@@ -969,6 +998,8 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
         return;
       }
       selectedTab = TabIndex.SPEED_DIAL;
+      previousTab = TabIndex.SPEED_DIAL;
+      hideDialpadIfNeeded();
 
       Fragment fragment = fragmentManager.findFragmentByTag(SPEED_DIAL_TAG);
       showFragment(fragment == null ? SpeedDialFragment.newInstance() : fragment, SPEED_DIAL_TAG);
@@ -983,6 +1014,8 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
         return;
       }
       selectedTab = TabIndex.CALL_LOG;
+      previousTab = TabIndex.CALL_LOG;
+      hideDialpadIfNeeded();
 
       Fragment fragment = fragmentManager.findFragmentByTag(CALL_LOG_TAG);
       showFragment(fragment == null ? new CallLogFragment() : fragment, CALL_LOG_TAG);
@@ -1028,11 +1061,25 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
         return;
       }
       selectedTab = TabIndex.CONTACTS;
+      previousTab = TabIndex.CONTACTS;
+      hideDialpadIfNeeded();
       Fragment fragment = fragmentManager.findFragmentByTag(CONTACTS_TAG);
       showFragment(
           fragment == null ? ContactsFragment.newInstance(Header.ADD_CONTACT) : fragment,
           CONTACTS_TAG);
       fab.show();
+    }
+
+    @Override
+    public void onDialpadSelected() {
+      LogUtil.enterBlock("MainBottomNavBarBottomNavTabListener.onDialpadSelected");
+      if (selectedTab == TabIndex.DIALPAD) {
+        return;
+      }
+      selectedTab = TabIndex.DIALPAD;
+      if (searchController != null) {
+        searchController.showDialpad(true);
+      }
     }
 
     @Override
@@ -1042,6 +1089,8 @@ public class OldMainActivityPeer implements MainActivityPeer, FragmentUtilListen
         return;
       }
       selectedTab = TabIndex.VOICEMAIL;
+      previousTab = TabIndex.VOICEMAIL;
+      hideDialpadIfNeeded();
 
       VisualVoicemailCallLogFragment fragment =
           (VisualVoicemailCallLogFragment) fragmentManager.findFragmentByTag(VOICEMAIL_TAG);

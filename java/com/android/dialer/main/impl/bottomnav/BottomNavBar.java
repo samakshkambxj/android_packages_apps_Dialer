@@ -58,6 +58,7 @@ public final class BottomNavBar extends FrameLayout {
     TabIndex.SPEED_DIAL,
     TabIndex.CALL_LOG,
     TabIndex.CONTACTS,
+    TabIndex.DIALPAD,
     TabIndex.VOICEMAIL,
   })
   public @interface TabIndex {
@@ -65,7 +66,11 @@ public final class BottomNavBar extends FrameLayout {
     int SPEED_DIAL = 0;
     int CALL_LOG = 1;
     int CONTACTS = 2;
-    int VOICEMAIL = 3;
+    // Inserted after CONTACTS so glass positions match indices with
+    // voicemail last. Note: persisted ints from older versions (where
+    // VOICEMAIL was 3) now resolve to DIALPAD exactly once.
+    int DIALPAD = 3;
+    int VOICEMAIL = 4;
   }
 
   private final List<OnBottomNavTabSelectedListener> listeners = new ArrayList<>();
@@ -164,6 +169,7 @@ public final class BottomNavBar extends FrameLayout {
     if (tab != TabIndex.SPEED_DIAL
         && tab != TabIndex.CALL_LOG
         && tab != TabIndex.CONTACTS
+        && tab != TabIndex.DIALPAD
         && tab != TabIndex.VOICEMAIL) {
       throw new IllegalStateException("Invalid tab: " + tab);
     }
@@ -201,6 +207,7 @@ public final class BottomNavBar extends FrameLayout {
     if (tab != TabIndex.SPEED_DIAL
         && tab != TabIndex.CALL_LOG
         && tab != TabIndex.CONTACTS
+        && tab != TabIndex.DIALPAD
         && tab != TabIndex.VOICEMAIL) {
       throw new IllegalStateException("Invalid tab: " + tab);
     }
@@ -234,6 +241,9 @@ public final class BottomNavBar extends FrameLayout {
         case TabIndex.CONTACTS:
           listener.onContactsSelected();
           break;
+        case TabIndex.DIALPAD:
+          listener.onDialpadSelected();
+          break;
         case TabIndex.VOICEMAIL:
           listener.onVoicemailSelected();
           break;
@@ -259,6 +269,9 @@ public final class BottomNavBar extends FrameLayout {
 
     /** Contacts tab was clicked. */
     void onContactsSelected();
+
+    /** Dialpad tab was clicked. */
+    void onDialpadSelected();
 
     /** Voicemail tab was clicked. */
     void onVoicemailSelected();

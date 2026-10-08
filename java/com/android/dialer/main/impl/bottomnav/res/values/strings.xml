@@ -19,6 +19,8 @@
   <string name="tab_title_call_history">Recents</string>
   <!-- Tab text to show users their favorite contacts that they can call in 1 click [CHAR LIMIT=10] -->
   <string name="tab_title_speed_dial">Favorites</string>
+  <!-- Tab text for the dialpad [CHAR LIMIT=10] -->
+  <string name="tab_title_dialpad">Keypad</string>
   <!-- Tab text to show users their voicemails  [CHAR LIMIT=10] -->
   <string name="tab_title_voicemail">Voicemail</string>
 

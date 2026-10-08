@@ -221,6 +221,12 @@ object DialerGlassNavBridge {
             BottomNavBar.TabIndex.CONTACTS,
         ),
         NavTab(
+            R.drawable.quantum_ic_dialpad_vd_theme_24,
+            R.drawable.quantum_ic_dialpad_vd_theme_24,
+            R.string.tab_title_dialpad,
+            BottomNavBar.TabIndex.DIALPAD,
+        ),
+        NavTab(
             R.drawable.quantum_ic_voicemail_vd_theme_24,
             R.drawable.quantum_ic_voicemail_vd_theme_24,
             R.string.tab_title_voicemail,

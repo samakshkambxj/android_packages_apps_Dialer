@@ -67,10 +67,12 @@
   <style name="DialpadKeyButtonStyle">
     <item name="android:soundEffectsEnabled">false</item>
     <item name="android:clickable">true</item>
-    <item name="android:layout_width">0dp</item>
-    <item name="android:layout_height">match_parent</item>
-    <item name="android:layout_weight">15</item>
-    <item name="android:minHeight">@dimen/dialpad_key_height</item>
+    <!-- Fixed square centered in the row cell so the circle background
+         renders truly round on any screen width. -->
+    <item name="android:layout_width">68dp</item>
+    <item name="android:layout_height">68dp</item>
+    <item name="android:layout_gravity">center</item>
+    <item name="android:minHeight">68dp</item>
     <item name="android:background">@drawable/dialpad_key_circle_bg</item>
     <item name="android:focusable">true</item>
   </style>

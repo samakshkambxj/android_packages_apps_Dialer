@@ -199,6 +199,13 @@ public class MainSearchController implements SearchBarListener {
    *
    * @see {@link #closeSearch(boolean)} to "remove" the dialpad.
    */
+  /** Hides the dialpad overlay if visible (e.g. when leaving the dialpad tab). */
+  public void hideDialpad() {
+    if (isDialpadVisible()) {
+      hideDialpad(/* animate=*/ true);
+    }
+  }
+
   private void hideDialpad(boolean animate) {
     LogUtil.enterBlock("MainSearchController.hideDialpad");
     if (dialpadFragment == null) {
@@ -359,7 +366,7 @@ public class MainSearchController implements SearchBarListener {
     return dialpadFragment;
   }
 
-  private boolean isDialpadVisible() {
+  public boolean isDialpadVisible() {
     return dialpadFragment != null
         && dialpadFragment.isAdded()
         && !dialpadFragment.isHidden()

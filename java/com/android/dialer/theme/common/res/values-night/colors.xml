@@ -21,4 +21,8 @@
   <color name="dialer_link_color">#b5c4ff</color>
   <color name="dialer_snackbar_action_text_color">@android:color/system_accent1_600</color>
   <color name="dialer_call_icon_color">@android:color/black</color>
+  <!-- iOS-style dialpad key circle fill. -->
+  <color name="dialpad_ios_key_background">#2C2C30</color>
+  <!-- iOS-style dialpad key glyphs: pure white like iOS dark mode. -->
+  <color name="dialpad_ios_key_text">#FFFFFF</color>
 </resources>

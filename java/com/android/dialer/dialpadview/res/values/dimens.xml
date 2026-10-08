@@ -16,10 +16,12 @@
 
 <resources>
   <!-- Text dimensions for dialpad keys -->
-  <dimen name="dialpad_key_pound_size">23sp</dimen>
+  <dimen name="dialpad_key_pound_size">30sp</dimen>
   <dimen name="dialpad_key_star_size">36sp</dimen>
   <dimen name="dialpad_key_height">64dp</dimen>
-  <dimen name="dialpad_symbol_margin_bottom">13dp</dimen>
+  <!-- iOS-style key circle diameter, centered in the key cell. -->
+  <dimen name="dialpad_ios_key_diameter">68dp</dimen>
+  <dimen name="dialpad_symbol_margin_bottom">0dp</dimen>
   <dimen name="dialpad_digits_text_min_size">24sp</dimen>
   <dimen name="dialpad_digits_padding">16dp</dimen>
   <dimen name="dialpad_digits_menu_left_padding">10dp</dimen>

@@ -195,7 +195,7 @@ public class DialpadView extends LinearLayout {
       }
 
       final RippleDrawable rippleBackground =
-          (RippleDrawable) getContext().getDrawable(R.drawable.btn_dialpad_key);
+          (RippleDrawable) getContext().getDrawable(R.drawable.dialpad_key_circle_bg);
       if (rippleColor != null) {
         rippleBackground.setColor(rippleColor);
       }

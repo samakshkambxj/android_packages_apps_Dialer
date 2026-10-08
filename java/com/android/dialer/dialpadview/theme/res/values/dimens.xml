@@ -16,8 +16,8 @@
   -->
 <resources>
   <!-- Text dimensions for dialpad keys -->
-  <dimen name="dialpad_key_numbers_default_size">36dp</dimen>
-  <dimen name="dialpad_key_letters_default_size_for_single_alphabet">12sp</dimen>
+  <dimen name="dialpad_key_numbers_default_size">32sp</dimen>
+  <dimen name="dialpad_key_letters_default_size_for_single_alphabet">10sp</dimen>
   <dimen name="dialpad_key_letters_default_size_for_dual_alphabets">10sp</dimen>
   <dimen name="dialpad_key_number_default_margin_bottom">3dp</dimen>
   <dimen name="dialpad_digits_text_size">34sp</dimen>

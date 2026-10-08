@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ iOS-style dialpad key background: a fixed-diameter circle centered in the
+  ~ key cell, with a ripple on top. Loaded programmatically by
+  ~ DialpadView.setupKeypad (which casts it to RippleDrawable), so the root
+  ~ element must stay a <ripple>.
+  -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?android:attr/colorControlHighlight">
+  <item
+      android:width="@dimen/dialpad_ios_key_diameter"
+      android:height="@dimen/dialpad_ios_key_diameter"
+      android:gravity="center">
+    <shape android:shape="oval">
+      <solid android:color="@color/dialpad_ios_key_background" />
+    </shape>
+  </item>
+</ripple>

@@ -89,7 +89,7 @@
         android:src="@drawable/quantum_ic_close_vd_theme_24"
         android:tintMode="src_in"
         android:visibility="gone"
-        app:tint="@color/dialer_theme_color_light" />
+        app:tint="@color/dialpad_ios_key_text" />
 
     <ImageButton
         android:id="@+id/dialpad_overflow"
@@ -104,7 +104,7 @@
         android:src="@drawable/quantum_ic_more_vert_vd_theme_24"
         android:tintMode="src_in"
         android:visibility="gone"
-        app:tint="@color/dialer_theme_color_light"
+        app:tint="@color/dialpad_ios_key_text"
         tools:visibility="visible"/>
 
       <FrameLayout android:layout_width="0dp"
@@ -135,7 +135,7 @@
             android:maxLines="1"
             android:scrollHorizontally="true"
             android:singleLine="true"
-            android:textColor="?attr/dialpad_text_color"
+            android:textColor="@color/dialpad_ios_key_text"
             android:textCursorDrawable="@null"
             android:textSize="?attr/dialpad_digits_adjustable_text_size"
             ex:resizing_text_min_size="@dimen/dialpad_digits_text_min_size"/>
@@ -152,7 +152,7 @@
         android:src="@drawable/quantum_ic_backspace_vd_theme_24"
         android:state_enabled="false"
         android:tintMode="src_in"
-        app:tint="@color/dialer_theme_color_light" />
+        app:tint="@color/dialpad_ios_key_text" />
   </LinearLayout>
 
   <View

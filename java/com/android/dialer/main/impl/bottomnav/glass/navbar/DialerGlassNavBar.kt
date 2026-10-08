@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -75,7 +76,6 @@ class GlassNavState(initial: Int) {
     var selectedIndex by mutableIntStateOf(initial)
         private set
     var voicemailVisible by mutableStateOf(true)
-        private set
 
     private val badgeTexts = mutableStateMapOf<Int, String>()
 
@@ -84,10 +84,6 @@ class GlassNavState(initial: Int) {
     /** External sync (e.g. selectTab); never notifies the listener. */
     fun select(index: Int) {
         selectedIndex = index
-    }
-
-    fun setVoicemailVisible(visible: Boolean) {
-        voicemailVisible = visible
     }
 
     fun setBadge(index: Int, text: String) {
@@ -158,6 +154,9 @@ private fun DialerNavBar(
                         onClick = { activateTab(index) },
                         modifier = Modifier.defaultMinSize(minWidth = 76.dp),
                     ) {
+                        // Inactive tabs resolve to a dim onSurface via
+                        // LocalContentColor; force white like the active tab.
+                        CompositionLocalProvider(LocalContentColor provides Color.White) {
                         val contentColor = LocalContentColor.current
                         Box(contentAlignment = Alignment.TopCenter) {
                             Icon(
@@ -192,6 +191,7 @@ private fun DialerNavBar(
                             softWrap = false,
                             overflow = TextOverflow.Visible,
                         )
+                        }
                     }
                 }
             }

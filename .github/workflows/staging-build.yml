@@ -25,6 +25,19 @@ jobs:
       - name: Make Gradle executable
         run: chmod +x gradlew
 
+      # Dialer calls hidden framework methods absent from the public SDK
+      # stubs (see gradle/tools/PatchHiddenApis.java). Inject compile-only
+      # stubs into the runner's android.jar; skips anything already present.
+      - name: Patch hidden framework APIs into android.jar
+        run: |
+          mkdir -p /tmp/dialer-ci-asm /tmp/dialer-ci-patcher
+          curl -sL -o /tmp/dialer-ci-asm/asm.jar \
+            https://repo1.maven.org/maven2/org/ow2/asm/asm/9.8/asm-9.8.jar
+          javac -cp /tmp/dialer-ci-asm/asm.jar -d /tmp/dialer-ci-patcher \
+            gradle/tools/PatchHiddenApis.java
+          java -cp /tmp/dialer-ci-patcher:/tmp/dialer-ci-asm/asm.jar PatchHiddenApis \
+            "$ANDROID_HOME/platforms/android-37/android.jar"
+
       - name: Build debug APK
         run: ./gradlew assembleDebug --no-daemon
 

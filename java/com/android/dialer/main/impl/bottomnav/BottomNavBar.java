@@ -93,6 +93,7 @@ public final class BottomNavBar extends FrameLayout {
         DialerGlassNavBridge.install(
             host,
             this::findCaptureRoot,
+            DialerGlassNavBridge.dialerTabs(),
             selectedTab,
             colors,
             this::selectTab);

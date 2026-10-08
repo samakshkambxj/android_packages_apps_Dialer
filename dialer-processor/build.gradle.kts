@@ -14,9 +14,14 @@ sourceSets {
     main {
         java {
             srcDirs("../java")
+            // ContextModule is app runtime code needing the Android SDK;
+            // the generator only needs the annotations.
             include(
                 "com/android/dialer/rootcomponentgenerator/**",
-                "com/android/dialer/inject/**",
+                "com/android/dialer/inject/HasRootComponent.java",
+                "com/android/dialer/inject/IncludeInDialerRoot.java",
+                "com/android/dialer/inject/RootComponentGeneratorMetadata.java",
+                "com/android/dialer/inject/ApplicationContext.java",
             )
         }
     }

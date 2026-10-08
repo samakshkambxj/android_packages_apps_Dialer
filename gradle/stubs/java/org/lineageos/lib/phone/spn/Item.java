@@ -26,4 +26,12 @@ public class Item {
     public String getLanguages() {
         return null;
     }
+
+    public String getOrganization() {
+        return null;
+    }
+
+    public String getWebsite() {
+        return null;
+    }
 }

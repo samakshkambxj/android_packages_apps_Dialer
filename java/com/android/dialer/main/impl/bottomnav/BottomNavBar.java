@@ -20,23 +20,36 @@ package com.android.dialer.main.impl.bottomnav;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 
+import androidx.annotation.AttrRes;
+import androidx.annotation.ColorInt;
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
+import androidx.compose.ui.platform.ComposeView;
 
 import com.android.dialer.R;
 import com.android.dialer.common.Assert;
 import com.android.dialer.common.LogUtil;
 import com.android.dialer.main.impl.MainActivity;
+import com.android.dialer.main.impl.bottomnav.glass.navbar.DialerGlassColors;
+import com.android.dialer.main.impl.bottomnav.glass.navbar.DialerGlassNavBridge;
+import com.android.dialer.main.impl.bottomnav.glass.navbar.GlassNavState;
+import com.android.dialer.util.DialerUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Dialer Bottom Nav Bar for {@link MainActivity}. */
-public final class BottomNavBar extends LinearLayout {
+/**
+ * Dialer Bottom Nav Bar for {@link MainActivity}.
+ *
+ * <p>The public contract (TabIndex, selectTab, showVoicemail, setNotificationCount, listeners) is
+ * unchanged; the rendering is an OriginSU-style liquid-glass floating pill hosted in a ComposeView
+ * (see {@link DialerGlassNavBridge}).
+ */
+public final class BottomNavBar extends FrameLayout {
 
   /** Index for each tab in the bottom nav. */
   @Retention(RetentionPolicy.SOURCE)
@@ -57,11 +70,10 @@ public final class BottomNavBar extends LinearLayout {
 
   private final List<OnBottomNavTabSelectedListener> listeners = new ArrayList<>();
 
-  private BottomNavItem speedDial;
-  private BottomNavItem callLog;
-  private BottomNavItem contacts;
-  private BottomNavItem voicemail;
-  private @TabIndex int selectedTab;
+  private GlassNavState glassState;
+  private @TabIndex int selectedTab = TabIndex.SPEED_DIAL;
+  private boolean voicemailVisible = true;
+  private View cachedCaptureRoot;
 
   public BottomNavBar(Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
@@ -70,31 +82,71 @@ public final class BottomNavBar extends LinearLayout {
   @Override
   protected void onFinishInflate() {
     super.onFinishInflate();
-    speedDial = findViewById(R.id.speed_dial_tab);
-    callLog = findViewById(R.id.call_log_tab);
-    contacts = findViewById(R.id.contacts_tab);
-    voicemail = findViewById(R.id.voicemail_tab);
-
-    speedDial.setup(R.string.tab_title_speed_dial, R.drawable.quantum_ic_star_outline_vd_theme_24,
-            R.drawable.quantum_ic_star_vd_theme_24);
-    callLog.setup(R.string.tab_title_call_history, R.drawable.quantum_ic_access_time_vd_theme_24,
-            R.drawable.quantum_ic_clock_filled_vd_theme_24);
-    contacts.setup(R.string.tab_all_contacts, R.drawable.quantum_ic_people_outline_vd_theme_24,
-            R.drawable.quantum_ic_people_vd_theme_24);
-    voicemail.setup(R.string.tab_title_voicemail, R.drawable.quantum_ic_voicemail_vd_theme_24,
-            R.drawable.quantum_ic_voicemail_vd_theme_24);
-
-    speedDial.setOnClickListener(v -> selectTab(TabIndex.SPEED_DIAL));
-    callLog.setOnClickListener(v -> selectTab(TabIndex.CALL_LOG));
-    contacts.setOnClickListener(v -> selectTab(TabIndex.CONTACTS));
-    voicemail.setOnClickListener(v -> selectTab(TabIndex.VOICEMAIL));
+    ComposeView host = findViewById(R.id.glass_nav_host);
+    DialerGlassColors colors =
+        new DialerGlassColors(
+            resolveThemeColor(android.R.attr.colorPrimary, android.R.attr.colorAccent),
+            DialerUtils.resolveColor(getContext(), android.R.attr.textColorPrimary),
+            DialerUtils.resolveColor(getContext(), android.R.attr.colorBackground),
+            resolveSurfaceContainer());
+    glassState =
+        DialerGlassNavBridge.install(
+            host,
+            this::findCaptureRoot,
+            selectedTab,
+            colors,
+            this::selectTab);
+    glassState.setVoicemailVisible(voicemailVisible);
   }
 
-  private void setSelected(View view) {
-    speedDial.setSelected(view == speedDial);
-    callLog.setSelected(view == callLog);
-    contacts.setSelected(view == contacts);
-    voicemail.setSelected(view == voicemail);
+  /**
+   * Returns the activity content sampled behind the glass pill. The bar host's own subtree only
+   * contains the pill, so sampling it would yield a blank backdrop; the content behind the bar
+   * (call list, contacts, ...) lives in the activity root.
+   */
+  @Nullable
+  private View findCaptureRoot() {
+    if (cachedCaptureRoot == null) {
+      View rootView = getRootView();
+      if (rootView != null) {
+        View content = rootView.findViewById(R.id.root_layout);
+        if (content != null) {
+          cachedCaptureRoot = content;
+        }
+      }
+      if (cachedCaptureRoot == null && getParent() instanceof View) {
+        cachedCaptureRoot = (View) getParent();
+      }
+    }
+    return cachedCaptureRoot;
+  }
+
+  @ColorInt
+  private int resolveThemeColor(@AttrRes int primary, @AttrRes int fallback) {
+    int color = DialerUtils.resolveColor(getContext(), primary);
+    if (color == 0) {
+      color = DialerUtils.resolveColor(getContext(), fallback);
+    }
+    return color;
+  }
+
+  @ColorInt
+  private int resolveSurfaceContainer() {
+    // Material3 role when the bundled material library provides it, else the floating-background
+    // role, else the window background. All are resolved from the current (day/night) theme.
+    int surfaceContainerAttr =
+        getResources().getIdentifier("colorSurfaceContainer", "attr", getContext().getPackageName());
+    if (surfaceContainerAttr != 0) {
+      int color = DialerUtils.resolveColor(getContext(), surfaceContainerAttr);
+      if (color != 0) {
+        return color;
+      }
+    }
+    int floating = DialerUtils.resolveColor(getContext(), android.R.attr.colorBackgroundFloating);
+    if (floating != 0) {
+      return floating;
+    }
+    return DialerUtils.resolveColor(getContext(), android.R.attr.colorBackground);
   }
 
   /**
@@ -103,22 +155,21 @@ public final class BottomNavBar extends LinearLayout {
    * @param tab {@link TabIndex}
    */
   public void selectTab(@TabIndex int tab) {
-    if (tab == TabIndex.SPEED_DIAL) {
-      selectedTab = TabIndex.SPEED_DIAL;
-      setSelected(speedDial);
-    } else if (tab == TabIndex.CALL_LOG) {
-      selectedTab = TabIndex.CALL_LOG;
-      setSelected(callLog);
-    } else if (tab == TabIndex.CONTACTS) {
-      selectedTab = TabIndex.CONTACTS;
-      setSelected(contacts);
-    } else if (tab == TabIndex.VOICEMAIL) {
-      selectedTab = TabIndex.VOICEMAIL;
-      setSelected(voicemail);
-    } else {
+    if (tab == TabIndex.VOICEMAIL && !voicemailVisible) {
+      // The glass bar only lays out visible tabs; keep the invariant that the selected tab is
+      // always visible, as showVoicemail() does when hiding the tab.
+      tab = TabIndex.SPEED_DIAL;
+    }
+    if (tab != TabIndex.SPEED_DIAL
+        && tab != TabIndex.CALL_LOG
+        && tab != TabIndex.CONTACTS
+        && tab != TabIndex.VOICEMAIL) {
       throw new IllegalStateException("Invalid tab: " + tab);
     }
-
+    selectedTab = tab;
+    if (glassState != null) {
+      glassState.select(tab);
+    }
     updateListeners(selectedTab);
   }
 
@@ -132,30 +183,38 @@ public final class BottomNavBar extends LinearLayout {
    */
   public void showVoicemail(boolean showTab) {
     LogUtil.i("OldMainActivityPeer.showVoicemail", "showing Tab:%b", showTab);
-    int voicemailpreviousVisibility = voicemail.getVisibility();
-    voicemail.setVisibility(showTab ? View.VISIBLE : View.GONE);
-    int voicemailcurrentVisibility = voicemail.getVisibility();
-
-    if (voicemailpreviousVisibility != voicemailcurrentVisibility
-        && voicemailpreviousVisibility == View.VISIBLE
-        && getSelectedTab() == TabIndex.VOICEMAIL) {
+    boolean wasVisible = voicemailVisible;
+    if (wasVisible && !showTab && getSelectedTab() == TabIndex.VOICEMAIL) {
       LogUtil.i("OldMainActivityPeer.showVoicemail", "hid VM tab and moved to speed dial tab");
+      // Reselect while all four tabs are still laid out, so the pill never points out of range.
       selectTab(TabIndex.SPEED_DIAL);
+    }
+    voicemailVisible = showTab;
+    if (glassState != null) {
+      glassState.setVoicemailVisible(showTab);
     }
   }
 
   public void setNotificationCount(@TabIndex int tab, int count) {
-    if (tab == TabIndex.SPEED_DIAL) {
-      speedDial.setNotificationCount(count);
-    } else if (tab == TabIndex.CALL_LOG) {
-      callLog.setNotificationCount(count);
-    } else if (tab == TabIndex.CONTACTS) {
-      contacts.setNotificationCount(count);
-    } else if (tab == TabIndex.VOICEMAIL) {
-      voicemail.setNotificationCount(count);
-    } else {
+    Assert.checkArgument(count >= 0, "Invalid count: " + count);
+    if (tab != TabIndex.SPEED_DIAL
+        && tab != TabIndex.CALL_LOG
+        && tab != TabIndex.CONTACTS
+        && tab != TabIndex.VOICEMAIL) {
       throw new IllegalStateException("Invalid tab: " + tab);
     }
+    if (glassState == null) {
+      return;
+    }
+    if (count == 0) {
+      glassState.clearBadge(tab);
+      return;
+    }
+    String countString = Integer.toString(count);
+    if (count > 9) {
+      countString = getContext().getString(R.string.bottom_nav_count_9_plus);
+    }
+    glassState.setBadge(tab, countString);
   }
 
   public void addOnTabSelectedListener(OnBottomNavTabSelectedListener listener) {

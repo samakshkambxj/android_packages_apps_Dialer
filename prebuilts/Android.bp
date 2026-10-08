@@ -32,3 +32,31 @@ java_import {
     jars: ["commons-io-2.13.0.jar"],
     sdk_version: "current",
 }
+
+// OriginSU liquid-glass navbar (same artifacts as ExactCalculator):
+// top.yukonga.miuix.kmp:miuix-blur-android:0.9.4-rc01 and its only
+// compile dependency miuix-shader-android.
+android_library_import {
+    name: "dialer-miuix-shader-android",
+    apex_available: [
+        "//apex_available:platform",
+        "//apex_available:anyapex",
+    ],
+    aars: ["miuix-shader-android-0.9.4-rc01.aar"],
+    sdk_version: "current",
+    static_libs: ["kotlin-stdlib"],
+}
+
+android_library_import {
+    name: "dialer-miuix-blur-android",
+    apex_available: [
+        "//apex_available:platform",
+        "//apex_available:anyapex",
+    ],
+    aars: ["miuix-blur-android-0.9.4-rc01.aar"],
+    sdk_version: "current",
+    static_libs: [
+        "dialer-miuix-shader-android",
+        "kotlin-stdlib",
+    ],
+}

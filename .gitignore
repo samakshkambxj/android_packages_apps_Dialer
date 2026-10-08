@@ -1,0 +1,4 @@
+# Gradle (CI staging build only; Soong remains authoritative)
+.gradle/
+build/
+local.properties
